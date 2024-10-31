@@ -1,12 +1,11 @@
 import streamlit as st
-from skimage import io, color
-from skimage import img_as_float
+from skimage import io
 from utils.template_matching import template_matching
 import numpy as np
 
-st.title("Buscador de patrones")
-img_objetivo_uploader = st.file_uploader("Elige una imagen objeivo", type=['jpg', 'jpeg','png'])
-seccion_img_uploader = st.file_uploader("Elige la imagen a buscar", type=['jpg', 'jpeg','png'])
+st.title("Identificador de patrones")
+img_objetivo_uploader = st.file_uploader("Elige una imagen objetivo", type=['jpg', 'jpeg'])
+seccion_img_uploader = st.file_uploader("Elige la imagen a buscar", type=['jpg', 'jpeg'])
 
 col1,col2 = st.columns([0.5,0.5], gap="small", vertical_alignment="top")
 
@@ -23,7 +22,9 @@ if seccion_img_uploader is not None:
         st.image(seccion_img, caption="Seccion a buscar")
 
 if img_objetivo_uploader is not None and seccion_img_uploader is not None:
-    response = template_matching(img_objetivo, seccion_img)
+    response = template_matching(img_objetivo, seccion_img, optimized=True)
     img_out = response.get("image")
+    lista = response.get("more_similar_list")
+    print(lista)
     st.header("Resultado")
     st.image(img_out, caption="Resultado")
