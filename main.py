@@ -21,10 +21,20 @@ if seccion_img_uploader is not None:
         st.header("Que buscar")
         st.image(seccion_img, caption="Seccion a buscar")
 
-if img_objetivo_uploader is not None and seccion_img_uploader is not None:
-    response = template_matching(img_objetivo, seccion_img, optimized=True)
-    img_out = response.get("image")
-    lista = response.get("more_similar_list")
-    print(lista)
-    st.header("Resultado")
-    st.image(img_out, caption="Resultado")
+if seccion_img_uploader is not None and img_objetivo_uploader is not None:
+    st.session_state.button_disabled = False
+else:
+    st.session_state.button_disabled = True
+
+def iniciar_busqueda():
+    st.session_state.button_disabled = True
+    if img_objetivo_uploader is not None and seccion_img_uploader is not None:
+        response = template_matching(img_objetivo, seccion_img, optimized=True)
+        img_out = response.get("image")
+        with result_cont:
+            st.header("Resultado")
+            st.image(img_out, caption="Resultado")
+    st.session_state.button_disabled = False
+
+st.button(key="buscar", on_click=iniciar_busqueda, label="Buscar", type="primary", use_container_width=True, disabled=st.session_state.button_disabled)
+result_cont = st.container()

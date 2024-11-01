@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.color import rgb2gray
 
-def template_matching(img : np.array, smaller_img : np.array, border_color = [255,0,0], border = 10, optimized = False):
+def template_matching(img : np.array, smaller_img : np.array, border_color = [255,0,0], border = 5, optimized = False):
     img_grey = rgb2gray(img)
     smaller_img_grey = rgb2gray(smaller_img)
     h, w = img.shape[:2]
@@ -11,9 +11,9 @@ def template_matching(img : np.array, smaller_img : np.array, border_color = [25
         print("La imagen a buscar es mas pequeña que la imagen objetivo")
         return {}
     else:
-        if optimized and (sh > 100 and sw > 100):
-            sh = 50
-            sw = 50
+        if optimized and (sh > 200 and sw > 200):
+            sh = 200
+            sw = 200
             smaller_img_grey = smaller_img_grey[:sh, :sw]
 
         h_iteracion = h - sh + 1
@@ -44,7 +44,7 @@ def template_matching(img : np.array, smaller_img : np.array, border_color = [25
         img[f:f+sh, c+sw-border:c+sw] = border_color
 
         response = {
-            "more_similar_list": ssd,
+            "ssd": ssd,
             "image": img
         }
         return response
