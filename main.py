@@ -29,7 +29,7 @@ else:
 def iniciar_busqueda():
     st.session_state.button_disabled = True
     if img_objetivo_uploader is not None and seccion_img_uploader is not None:
-        response = template_matching(img_objetivo, seccion_img, optimized=True)
+        response = template_matching(img_objetivo, seccion_img, optimized=True, new_size=50)
         img_out = response.get("image")
         with result_cont:
             st.header("Resultado")
