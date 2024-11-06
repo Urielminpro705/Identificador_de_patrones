@@ -1,7 +1,8 @@
 import numpy as np
 from skimage.color import rgb2gray
+import streamlit as st
 
-def template_matching(img : np.array, smaller_img : np.array, border_color = [255,0,0], border = 5, optimized = False, new_size = 100):
+def template_matching(img : np.array, smaller_img : np.array, border_color = [255,0,0], border = 5, optimized = False, new_size = 100, progress_bar=None):
     img_grey = rgb2gray(img)
     smaller_img_grey = rgb2gray(smaller_img)
     h, w = img.shape[:2]
@@ -17,22 +18,31 @@ def template_matching(img : np.array, smaller_img : np.array, border_color = [25
             cut_result = cut_img(smaller_img_grey, sw)
             smaller_img_grey = cut_result[0]
 
-        h_iteracion = h - sh + 1
-        w_iteracion = w - sw + 1
-        ssd = np.zeros((h_iteracion,w_iteracion))
+        h_iteration = h - sh + 1
+        w_iteration = w - sw + 1
+        ssd = np.zeros((h_iteration,w_iteration))
+        total_iterations = h_iteration*w_iteration
+        update_interval = total_iterations // 10
+        completed_iterations = 0
+
         # Valor, fila, columna
         more_similar = [float("inf"),0,0]
-        for f in range(h_iteracion):
-            for c in range(w_iteracion):
+        for f in range(h_iteration):
+            for c in range(w_iteration):
                 section = img_grey[f:f+sh, c:c+sw]
-                valor = np.sum((section - smaller_img_grey)**2)
-                ssd[f,c] = valor
-                if valor < 0.4:
-                    more_similar = [valor,f,c]
+                value = np.sum((section - smaller_img_grey)**2)
+                ssd[f,c] = value
+                completed_iterations += 1
+                if progress_bar:
+                    if completed_iterations % update_interval == 0:
+                        progress_percentage = int((completed_iterations / total_iterations) * 100)
+                        progress_bar.progress(progress_percentage, "Buscando...")
+                if value < 0.4:
+                    more_similar = [value,f,c]
                     break
-                if valor < more_similar[0]:
-                    more_similar = [valor,f,c]
-
+                if value < more_similar[0]:
+                    more_similar = [value,f,c]
+        
         sh, sw, _ = smaller_img.shape
         _, f, c = more_similar
         if optimized:
@@ -46,7 +56,8 @@ def template_matching(img : np.array, smaller_img : np.array, border_color = [25
         img[f:f+sh, c:c+border] = border_color
         # End
         img[f:f+sh, c+sw-border:c+sw] = border_color
-
+        if progress_bar:
+            progress_bar.progress(100, "Completado")
         response = {
             "ssd": ssd,
             "image": img
