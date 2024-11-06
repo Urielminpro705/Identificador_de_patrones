@@ -36,6 +36,8 @@ optimized = st.toggle("Optimizar (Recomendado para imagenes muy grandes)", value
 # Slider para el tamaño de recorte
 if optimized:
     section_size = st.slider("Tamaño de recorte", 30, 200, value=50)
+else:
+    section_size = 0
 
 # Contenedor de la barra de progreso
 progress_bar_cont = st.container()
