@@ -10,6 +10,7 @@ def template_matching(img : np.array, smaller_img : np.array, border_color = [25
 
     if h < sh or w < sw:
         print("La imagen a buscar es mas pequeña que la imagen objetivo")
+        progress_bar.empty()
         return {}
     else:
         if optimized:
