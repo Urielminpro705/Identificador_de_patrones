@@ -14,9 +14,9 @@ def template_matching(img : np.array, smaller_img : np.array, border_color = [25
         return {}
     else:
         if optimized:
-            sh = new_size
-            sw = new_size
-            cut_result = cut_img(smaller_img_grey, sw)
+            cut_result = cut_img(smaller_img_grey, new_size)
+            sh = new_size if cut_result[2] != 0 else sh
+            sw = new_size if cut_result[1] != 0 else sw
             smaller_img_grey = cut_result[0]
 
         h_iteration = h - sh + 1
@@ -24,6 +24,8 @@ def template_matching(img : np.array, smaller_img : np.array, border_color = [25
         ssd = np.zeros((h_iteration,w_iteration))
         total_iterations = h_iteration*w_iteration
         update_interval = total_iterations // 10
+        if update_interval == 0:
+            update_interval = 1
         completed_iterations = 0
 
         # Valor, fila, columna

@@ -34,18 +34,6 @@ col1,col2 = st.columns([0.5,0.5], gap="small", vertical_alignment="top")
 # Switch para activar o desactivar la optimizacion
 optimized = st.toggle("Optimizar (Recomendado para imagenes muy grandes)", value = False)
 
-# Slider para el tamaño de recorte
-if optimized and section_img_uploader is not None:
-    img = io.imread(section_img_uploader)
-    size = img.shape[:2]
-    smaller = min(size)
-    if smaller < 40:
-        st.warning("La imagen a buscar ya es muy pequeña")
-    else:
-        section_size = st.slider("Tamaño de recorte", 30, 200 if smaller >= 200 else smaller)
-else:
-    section_size = 0
-
 # Contenedor de la barra de progreso
 progress_bar_cont = st.container()
 
@@ -59,6 +47,17 @@ if img_objetivo_uploader is not None:
 # Comprobar si ya existe la seccion a buscar para mostrarla
 if section_img_uploader is not None:
     section_img = io.imread(section_img_uploader)
+    # Slider para el recorte
+    if optimized:
+        size = section_img.shape[:2]
+        smaller = min(size)
+        if smaller < 50:
+            st.warning("La imagen a buscar ya es muy pequeña (solo se hara un recorte cuadrado usando su lado mas pequeño)")
+            section_size = smaller
+        else:
+            section_size = st.slider("Tamaño de recorte", 30, 200 if smaller >= 200 else smaller)
+    else:
+        section_size = 0
     with col2:
         st.subheader("Que buscar")
         st.image(section_img, caption="Seccion a buscar")
