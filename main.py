@@ -4,21 +4,29 @@ from skimage.color import rgb2gray
 from utils.template_matching import template_matching
 import numpy as np
 
+
+
 def iniciar_busqueda():
     st.session_state.button_disabled = True
     with progress_bar_cont:
         progress_text = "Buscando..."
         progress_bar = st.progress(0, text=progress_text)
-    if img_objetivo_uploader is not None and section_img_uploader is not None:
-        response = template_matching(img_objetivo, section_img, optimized=optimized, new_size=section_size, progress_bar=progress_bar)
-        img_out = response.get("image")
-        if img_out is not None:
-            with result_cont:
-                st.subheader("Resultado")
-                st.image(img_out, caption="Resultado")
-        else:
-            with result_cont:
-                st.warning("La imagen a buscar debe ser mas pequeña que la imagen objetivo")
+    color = []
+    if frame_color == "Rojo":
+        color = [255,0,0]
+    elif frame_color == "Verde":
+        color = [0,255,0]
+    elif frame_color == "Azul":
+        color = [0,0,255]
+    response = template_matching(img_objetivo, section_img, optimized=optimized, new_size=section_size, progress_bar=progress_bar, border_color=color)
+    img_out = response.get("image")
+    if img_out is not None:
+        with result_cont:
+            st.subheader("Resultado")
+            st.image(img_out, caption="Resultado")
+    else:
+        with result_cont:
+            st.warning("La imagen a buscar debe ser mas pequeña que la imagen objetivo")
     st.session_state.button_disabled = False
 
 # Titulo de la app
@@ -31,11 +39,13 @@ section_img_uploader = st.file_uploader("Elige la imagen a buscar", type=['jpg',
 # Columnas para mostrar las dos imagenes subidas
 col1,col2 = st.columns([0.5,0.5], gap="small", vertical_alignment="top")
 
+frame_color = st.selectbox(
+    "Escoge un color para el marco",
+    ("Rojo","Verde","Azul")
+)
+
 # Switch para activar o desactivar la optimizacion
 optimized = st.toggle("Optimizar (Recomendado para imagenes muy grandes)", value = False)
-
-# Contenedor de la barra de progreso
-progress_bar_cont = st.container()
 
 # Comprobar si ya existe la imagen objetivo para mostrarla
 if img_objetivo_uploader is not None:
@@ -67,6 +77,9 @@ if section_img_uploader is not None and img_objetivo_uploader is not None:
     st.session_state.button_disabled = False
 else:
     st.session_state.button_disabled = True
+
+# Contenedor de la barra de progreso
+progress_bar_cont = st.container()
 
 # Boton para iniciar la busqueda
 st.button(key="buscar", on_click=iniciar_busqueda, label="Buscar", type="primary", use_container_width=True, disabled=st.session_state.button_disabled)
