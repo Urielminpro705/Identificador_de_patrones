@@ -3,10 +3,22 @@ from skimage.color import rgb2gray
 import streamlit as st
 
 def template_matching(img : np.array, smaller_img : np.array, border_color = [255,0,0], border = 5, optimized = False, new_size = 100, progress_bar=None):
-    img_grey = rgb2gray(img)
-    smaller_img_grey = rgb2gray(smaller_img)
-    h, w = img.shape[:2]
-    sh, sw = smaller_img.shape[:2]
+    if len(img.shape) > 2:
+        img_grey = rgb2gray(img)
+    else:
+        img_grey = img
+        img = np.stack((img,) * 3, axis = -1)
+        print(f"Imagen original {img_grey.shape}")
+    if len(smaller_img.shape) > 2:
+        smaller_img_grey = rgb2gray(smaller_img)
+        print(f"Seccion: {smaller_img_grey.shape}")
+        print(smaller_img)
+        print(smaller_img_grey)
+    else:
+        smaller_img_grey = smaller_img
+        smaller_img = np.stack((smaller_img,) * 3, axis = -1)
+    h, w = img_grey.shape
+    sh, sw = smaller_img_grey.shape
 
     if h < sh or w < sw:
         print("La imagen a buscar es mas pequeña que la imagen objetivo")
