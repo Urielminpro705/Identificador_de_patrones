@@ -1,5 +1,7 @@
 import numpy as np
+from skimage import img_as_ubyte
 from skimage.color import rgb2gray
+from skimage.transform import resize
 import streamlit as st
 
 def template_matching(img : np.array, smaller_img : np.array, border_color = [255,0,0], border = 5, optimized = False, new_size = 100, progress_bar=None):
@@ -89,6 +91,23 @@ def cut_img(img : np.array, size = 100):
         margin_start = 0
         margin_top = 0
     return [img,margin_start,margin_top]
+
+def scaled_images_bank(levels : int, img : np.array):
+    h,w = img.shape
+    gap = 100/levels
+    percent = 100
+    sizes = [percent]
+    resized_images = []
+    for i in range(levels-1):
+        percent -= gap
+        sizes.append(percent)
+    
+    for i in sizes:
+        w *= (i/100)
+        h *= (i/100)
+        resized_image = resize(img, (h,w), preserve_range=True)
+        resized_images.append(resized_image)
+    return resized_images
 
 # img = np.array([
 #     [[1,2,3],[4,5,6],[7,8,9]],
