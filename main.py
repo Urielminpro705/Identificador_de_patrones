@@ -1,10 +1,10 @@
 import streamlit as st
 from skimage import io
 from skimage.color import rgb2gray
-from utils.template_matching import template_matching
+from utils.template_matching import Template_Matching as TM
 import numpy as np
 
-
+template_matching = TM()
 
 def iniciar_busqueda():
     st.session_state.button_disabled = True
@@ -18,7 +18,7 @@ def iniciar_busqueda():
         color = [0,255,0]
     elif frame_color == "Azul":
         color = [0,0,255]
-    response = template_matching(img_objetivo, section_img, optimized=optimized, new_size=section_size, progress_bar=progress_bar, border_color=color)
+    response = template_matching.search(img_objetivo, section_img, optimized=optimized, new_size=section_size, progress_bar=progress_bar, border_color=color)
     img_out = response.get("image")
     if img_out is not None:
         with result_cont:

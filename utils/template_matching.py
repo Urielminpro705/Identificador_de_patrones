@@ -4,23 +4,33 @@ from skimage.transform import resize
 from abc import ABC, abstractmethod
 
 class Template_Matching(ABC):
-    def __init__(self):
-        self.img = None
-        self.smaller_img = None
+    def search(self, img, smaller_img, border_color = [255,0,0], border = 5, optimized = False, new_size = 100, progress_bar=None):
+        self.img = img
+        self.smaller_img = smaller_img
         self.img_grey = None
         self.smaller_img_grey = None
         self.h = None
         self.w = None
         self.sw = None
         self.sh = None
-        self.progress_bar = None
-        self.optimized = False
-        self.new_size = 100
+        self.progress_bar = progress_bar
+        self.optimized = optimized
+        self.new_size = new_size
+        self.ssd = None
         self.more_similar = None
         self.cut_result = None
-        self.border_color = [255,0,0]
-        self.border = 5
-        pass
+        self.border_color = border_color
+        self.border = border
+        self.__grayscale()
+        if self.__size_check():
+            self.__is_optimized()
+            self.__ssd()
+            self.__add_frame()
+        response = {
+            "ssd": self.ssd,
+            "image": self.img
+        }
+        return response
     
     def __grayscale(self):
         if len(self.img.shape) > 2:
@@ -34,7 +44,7 @@ class Template_Matching(ABC):
             self.smaller_img_grey = self.smaller_img
             self.smaller_img = np.stack((self.smaller_img,) * 3, axis = -1)
 
-    def size_check(self):
+    def __size_check(self):
         self.h, self.w = self.img_grey.shape
         self.sh, self.sw = self.smaller_img_grey.shape
         if self.h < self.sh or self.w < self.sw:
@@ -43,15 +53,14 @@ class Template_Matching(ABC):
             return False
         return True
 
-    def is_optimized(self):
+    def __is_optimized(self):
         if self.optimized:
-            cut_result = cut_img(self.smaller_img_grey, self.new_size)
-            self.sh = self.new_size if cut_result[2] != 0 else self.sh
-            self.sw = self.new_size if cut_result[1] != 0 else self.sw
-            self.smaller_img_grey = cut_result[0]
+            self.cut_result = cut_img(self.smaller_img_grey, self.new_size)
+            self.sh = self.new_size if self.cut_result[2] != 0 else self.sh
+            self.sw = self.new_size if self.cut_result[1] != 0 else self.sw
+            self.smaller_img_grey = self.cut_result[0]
 
-    @abstractmethod
-    def sdc(self):
+    def __ssd(self):
         h_iteration = self.h - self.sh + 1
         w_iteration = self.w - self.sw + 1
         ssd = np.zeros((h_iteration,w_iteration))
@@ -74,14 +83,14 @@ class Template_Matching(ABC):
                         progress_percentage = int((completed_iterations / total_iterations) * 100)
                         self.progress_bar.progress(progress_percentage, "Buscando...")
                 if value < 0.4:
-                    more_similar = [value,f,c]
+                    self.more_similar = [value,f,c]
                     break
-                if value < more_similar[0]:
-                    more_similar = [value,f,c]
+                if value < self.more_similar[0]:
+                    self.more_similar = [value,f,c]
         
         self.sh, self.sw, _ = self.smaller_img.shape
     
-    def add_frame(self):
+    def __add_frame(self):
         _, f, c = self.more_similar
         if self.optimized:
             f -= self.cut_result[2]
