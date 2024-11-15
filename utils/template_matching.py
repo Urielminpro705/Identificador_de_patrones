@@ -24,7 +24,7 @@ class Template_Matching(ABC):
         self.__grayscale()
         if self.__size_check():
             self.__is_optimized()
-            self.__ssd()
+            self.calculate_ssd()
             self.__add_frame()
         response = {
             "ssd": self.ssd,
@@ -60,7 +60,29 @@ class Template_Matching(ABC):
             self.sw = self.new_size if self.cut_result[1] != 0 else self.sw
             self.smaller_img_grey = self.cut_result[0]
 
-    def __ssd(self):
+    @abstractmethod
+    def calculate_ssd(self):
+        pass
+    
+    def __add_frame(self):
+        _, f, c = self.more_similar
+        if self.optimized:
+            f -= self.cut_result[2]
+            c -= self.cut_result[1]
+
+        # Top
+        self.img[f:f+self.border, c:c+self.sw] = self.border_color
+        # Bottom
+        self.img[f+self.sh-self.border:f+self.sh, c:c+self.sw] = self.border_color
+        # Start
+        self.img[f:f+self.sh, c:c+self.border] = self.border_color
+        # End
+        self.img[f:f+self.sh, c+self.sw-self.border:c+self.sw] = self.border_color
+        if self.progress_bar:
+            self.progress_bar.progress(100, "Completado")
+
+class Template_Matching_Same_Size(Template_Matching):
+    def calculate_ssd(self):
         h_iteration = self.h - self.sh + 1
         w_iteration = self.w - self.sw + 1
         ssd = np.zeros((h_iteration,w_iteration))
@@ -89,23 +111,6 @@ class Template_Matching(ABC):
                     self.more_similar = [value,f,c]
         
         self.sh, self.sw, _ = self.smaller_img.shape
-    
-    def __add_frame(self):
-        _, f, c = self.more_similar
-        if self.optimized:
-            f -= self.cut_result[2]
-            c -= self.cut_result[1]
-
-        # Top
-        self.img[f:f+self.border, c:c+self.sw] = self.border_color
-        # Bottom
-        self.img[f+self.sh-self.border:f+self.sh, c:c+self.sw] = self.border_color
-        # Start
-        self.img[f:f+self.sh, c:c+self.border] = self.border_color
-        # End
-        self.img[f:f+self.sh, c+self.sw-self.border:c+self.sw] = self.border_color
-        if self.progress_bar:
-            self.progress_bar.progress(100, "Completado")
 
 
 def template_matching(img : np.array, smaller_img : np.array, border_color = [255,0,0], border = 5, optimized = False, new_size = 100, progress_bar=None):

@@ -1,10 +1,10 @@
 import streamlit as st
 from skimage import io
 from skimage.color import rgb2gray
-from utils.template_matching import Template_Matching as TM
+from utils.template_matching import Template_Matching_Same_Size
 import numpy as np
 
-template_matching = TM()
+template_matching = Template_Matching_Same_Size()
 
 def iniciar_busqueda():
     st.session_state.button_disabled = True
