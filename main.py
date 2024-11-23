@@ -18,7 +18,7 @@ def iniciar_busqueda():
         color = [0,255,0]
     elif frame_color == "Azul":
         color = [0,0,255]
-    response = template_matching.search(img_objetivo, section_img, optimized=optimized, new_size=section_size, progress_bar=progress_bar, border_color=color)
+    response = template_matching.search(img_objetivo, section_img, optimized=optimized, new_size=section_size, progress_bar=progress_bar, border_color=color, scales=10)
     img_out = response.get("image")
     if img_out is not None:
         with result_cont:
@@ -65,7 +65,7 @@ if section_img_uploader is not None:
             st.warning("La imagen a buscar ya es muy pequeña (solo se hara un recorte cuadrado usando su lado mas pequeño)")
             section_size = smaller
         else:
-            section_size = st.slider("Tamaño de recorte", 30, 200 if smaller >= 200 else smaller)
+            section_size = st.slider("Tamaño de recorte", 50, 200 if smaller >= 200 else smaller)
     else:
         section_size = 0
     with col2:

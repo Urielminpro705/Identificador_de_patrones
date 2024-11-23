@@ -1,16 +1,29 @@
 import utils.io_image as io
 from skimage.io import imread
 from PIL import Image
+from numpy import convolve
 from utils.template_matching import scaled_images_bank
+from utils.filters import conv2d
+import numpy as np
 
 # img = io.read_image("data/images/reloj.jpg")
 # img_descarga = Image.fromarray(img)
 # img_descarga.save("data/images/reloj_gris.jpg")
 
-img = io.read_image("data/images/nube.jpg")
-img_escaladas = scaled_images_bank(3,img)
-print(img_escaladas[0])
-print(img)
+img = io.read_image("data/images/pim.jpg")
+
+imgs = scaled_images_bank(10,img)
+
+io.planes_print(imgs,["100","95","90","85","80","75","70","65","60","55"],2,5)
+# kernel = np.array([
+#     [0,1,0],
+#     [1,-4,1],
+#     [0,1,0],
+# ])
+# orillas = conv2d(img, kernel)
+# io.print_img(orillas,"LOL")
+
+
 # print(len(img_escaladas))
 # img_descarga1 = Image.fromarray(img_escaladas[0])
 # img_descarga2 = Image.fromarray(img_escaladas[1])
