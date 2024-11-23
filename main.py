@@ -1,7 +1,7 @@
 import streamlit as st
 from skimage import io
 from skimage.color import rgb2gray
-from utils.template_matching import Template_Matching_Same_Size
+from utils.template_matching import Template_Matching_Same_Size, Template_Matching_Differents_Scales
 import numpy as np
 
 template_matching = Template_Matching_Same_Size()

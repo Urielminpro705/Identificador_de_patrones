@@ -126,7 +126,48 @@ class Template_Matching_Same_Size(Template_Matching):
         
         self.sh, self.sw, _ = self.smaller_img.shape
 
+class Template_Matching_Differents_Scales(Template_Matching):
+    def preprocessing(self):
+        return super().preprocessing()
+    
+    def calculate_ssd(self):
+        scaled_images = scaled_images_bank(self.scales, self.smaller_img_grey)
+        h_iteration = 0
+        w_iteration = 0
+        total_iterations = 0
+        for img in scaled_images:
+            sh, sw = img.shape
+            h_iteration = self.h - sh + 1
+            w_iteration = self.w - sw + 1
+            total_iterations += h_iteration*w_iteration
+        update_interval = total_iterations // 10
+        if update_interval == 0:
+            update_interval = 1
+        completed_iterations = 0
 
+        # Valor, fila, columna
+        self.more_similar = [float("inf"),0,0]
+        for smaller_img in scaled_images:
+            sh,sw = smaller_img.shape
+            h_iteration = self.h - sh + 1
+            w_iteration = self.w - sw + 1
+
+            for f in range(h_iteration):
+                for c in range(w_iteration):
+                    section = self.img_grey[f:f+sh, c:c+sw]
+                    value = np.sum((section - smaller_img)**2)
+                    completed_iterations += 1
+                    if self.progress_bar:
+                        if completed_iterations % update_interval == 0:
+                            progress_percentage = int((completed_iterations / total_iterations) * 100)
+                            self.progress_bar.progress(progress_percentage, "Buscando...")
+                    # if value < 0.4:
+                    #     self.more_similar = [value,f,c]
+                    #     break
+                    if value < self.more_similar[0]:
+                        self.more_similar = [value,f,c]
+                        self.smaller_img_grey = smaller_img
+        self.sh, self.sw = self.smaller_img_grey.shape       
 
 def cut_img(img : np.array, size = 100):
     h,w = img.shape
