@@ -6,6 +6,7 @@ import numpy as np
 
 template_matching = Template_Matching_Same_Size()
 
+# Funcion para tomar los datos de los inputs e iniciar la busqueda
 def iniciar_busqueda():
     st.session_state.button_disabled = True
     with progress_bar_cont:
@@ -18,7 +19,7 @@ def iniciar_busqueda():
         color = [0,255,0]
     elif frame_color == "Azul":
         color = [0,0,255]
-    response = template_matching.search(img_objetivo, section_img, optimized=optimized, new_size=section_size, progress_bar=progress_bar, border_color=color, scales=10)
+    response = template_matching.search(img_objetivo, section_img, optimized=optimized, new_size=section_size, progress_bar=progress_bar, border_color=color, scales=10, border=border)
     img_out = response.get("image")
     if img_out is not None:
         with result_cont:
@@ -43,6 +44,8 @@ frame_color = st.selectbox(
     "Escoge un color para el marco",
     ("Rojo","Verde","Azul")
 )
+
+border = st.number_input(label="Escoge un grosor en pixeles para el marco (1 a 10)",step=1, min_value=1, max_value=10, value=5)
 
 # Switch para activar o desactivar la optimizacion
 optimized = st.toggle("Optimizar (Recomendado para imagenes muy grandes)", value = False)

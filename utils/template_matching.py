@@ -2,10 +2,11 @@ import numpy as np
 from skimage.color import rgb2gray
 from skimage.transform import resize
 from abc import ABC, abstractmethod
-from utils.filters import conv2d
 
 class Template_Matching(ABC):
-    def search(self, img, smaller_img, border_color = [255,0,0], border = 5, optimized = False, new_size = 100, progress_bar=None, scales = 5):
+    def search(self, img, smaller_img, border_color = [255,0,0], border = 5, 
+                optimized = False, new_size = 100, progress_bar=None, scales = 5):
+        # Declaracion de variables
         self.img = img
         self.smaller_img = smaller_img
         self.img_grey = None
@@ -23,6 +24,8 @@ class Template_Matching(ABC):
         self.border_color = border_color
         self.border = border
         self.scales = scales
+
+        # Ejecucion de los metodos
         self.preprocessing()
         if self.__size_check():
             self.__is_optimized()
@@ -34,6 +37,7 @@ class Template_Matching(ABC):
         }
         return response
 
+    # Metodo abstracto para el preprocesado de la imagen
     @abstractmethod
     def preprocessing(self):
         if len(self.img.shape) > 2:
@@ -46,15 +50,8 @@ class Template_Matching(ABC):
         else:
             self.smaller_img_grey = self.smaller_img
             self.smaller_img = np.stack((self.smaller_img,) * 3, axis = -1)
-        
-        # kernel = np.array([
-        #     [0,1,0],
-        #     [1,-4,1],
-        #     [0,1,0]
-        # ])
-        # self.img_grey = conv2d(self.img_grey, kernel)
-        # self.smaller_img_grey = conv2d(self.smaller_img_grey, kernel)
 
+    # Metodo para comprobar el tamaño de las imagenes
     def __size_check(self):
         self.h, self.w = self.img_grey.shape
         self.sh, self.sw = self.smaller_img_grey.shape
@@ -64,6 +61,7 @@ class Template_Matching(ABC):
             return False
         return True
 
+    # Metodo para optimizar la imagen
     def __is_optimized(self):
         if self.optimized:
             self.cut_result = cut_img(self.smaller_img_grey, self.new_size)
@@ -71,10 +69,12 @@ class Template_Matching(ABC):
             self.sw = self.new_size if self.cut_result[1] != 0 else self.sw
             self.smaller_img_grey = self.cut_result[0]
 
+    # Metodo abstracto para buscar en la imagen
     @abstractmethod
     def calculate_ssd(self):
         pass
     
+    # Metodo para agregar el marco que muestra la zona con mas similitud
     def __add_frame(self):
         _,f, c = self.more_similar
         if self.optimized:
@@ -97,6 +97,7 @@ class Template_Matching_Same_Size(Template_Matching):
         return super().preprocessing()
     
     def calculate_ssd(self):
+        # Calcular el numero total de iteraciones
         h_iteration = self.h - self.sh + 1
         w_iteration = self.w - self.sw + 1
         ssd = np.zeros((h_iteration,w_iteration))
@@ -127,7 +128,7 @@ class Template_Matching_Same_Size(Template_Matching):
         self.sh, self.sw, _ = self.smaller_img.shape
 
 
-
+# Funcion para cortar una imagen
 def cut_img(img : np.array, size = 100):
     h,w = img.shape
     if h > size and w > size:
