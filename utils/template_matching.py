@@ -31,6 +31,8 @@ class Template_Matching(ABC):
             self.__is_optimized()
             self.calculate_ssd()
             self.__add_frame()
+        else:
+            return {}
         response = {
             "ssd": self.ssd,
             "image": self.img
